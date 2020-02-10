@@ -1,14 +1,55 @@
 import itertools
+import prompt_toolkit
 
 faction_stats = {
-    'Marquise de Cat': { 'key': 'MdC', 'max': 1, 'reach': [ 10 ] },
-    'Underground Duchy': { 'key': 'UD', 'max': 1, 'reach': [ 8 ] },
-    'Eyrie Dynasties': { 'key': 'ED', 'max': 1, 'reach': [ 7 ] },
-    'Vagabond': { 'key': 'V', 'max': 2, 'reach': [ 5, 2 ] },
-    'Riverfolk Company': { 'key': 'RC', 'max': 1, 'reach': [ 5 ] },
-    'Woodland Alliance': { 'key': 'WA', 'max': 1, 'reach': [ 3 ] },
-    'Corvid Conspiracy': { 'key': 'CC', 'max': 1, 'reach': [ 3 ] },
-    'Lizard Cult': { 'key': 'LC', 'max': 1, 'reach': [ 2 ] }
+    'Marquise de Cat': {
+        'key': 'MdC',
+        'short': 'cats',
+        'max': 1,
+        'reach': [ 10 ]
+    },
+    'Underground Duchy': {
+        'key': 'UD',
+        'short': 'moles',
+        'max': 1,
+        'reach': [ 8 ]
+    },
+    'Eyrie Dynasties': {
+        'key': 'ED',
+        'short': 'birds',
+        'max': 1,
+        'reach': [ 7 ]
+    },
+    'Vagabond': {
+        'key': 'V',
+        'short': 'vagabond',
+        'max': 2,
+        'reach': [ 5, 2 ]
+    },
+    'Riverfolk Company': {
+        'key': 'RC',
+        'short': 'otters',
+        'max': 1,
+        'reach': [ 5 ]
+    },
+    'Woodland Alliance': {
+        'key': 'WA',
+        'short': 'mice',
+        'max': 1,
+        'reach': [ 3 ]
+    },
+    'Corvid Conspiracy': {
+        'key': 'CC',
+        'short': 'crows',
+        'max': 1,
+        'reach': [ 3 ]
+    },
+    'Lizard Cult': {
+        'key': 'LC',
+        'short': 'lizards',
+        'max': 1,
+        'reach': [ 2 ]
+    }
 }
 
 player_reach_sums = {
@@ -19,16 +60,25 @@ player_reach_sums = {
     6: 28
 }
 
+short_names = {
+    'cats': 'Marquise de Cat',
+
+}
+
 valid_configurations = { n: [] for n in player_reach_sums.keys() }
 
 class Faction:
     factions = dict()
-    def __init__(self, name, key, max, reach):
+    short_names = dict()
+
+    def __init__(self, name, key, short_name, max, reach):
         self._name = name
+        self.short_name = short_name
         self.key = key
         self.max = max
         self._reach = reach
         self.factions[name] = self
+        self.short_names[short_name] = self
 
     def reach(self, index):
         return self._reach[index]
@@ -159,12 +209,14 @@ class FactionCombinations:
         return self._invalid
 
 
-factions = { k:Faction(k, v['key'], v['max'], v['reach'])  for k,v in faction_stats.items() }
+_ = [ Faction(k, v['key'], v['short'], v['max'], v['reach'])  for k,v in faction_stats.items() ]
 
-combinations_per_players = { k:FactionCombinations(k, v, factions.values()) for k,v in player_reach_sums.items() }
-recommended = { k:v.recommended  for k,v in combinations_per_players.items() }
-invalid = { k:v.invalid  for k,v in combinations_per_players.items() }
-found = { k:v.found for k,v in combinations_per_players.items() }
-acceptable = { k:v.acceptable for k,v in combinations_per_players.items() }
+#combinations_per_players = { k:FactionCombinations(k, v, factions.values()) for k,v in player_reach_sums.items() }
+#recommended = { k:v.recommended  for k,v in combinations_per_players.items() }
+#invalid = { k:v.invalid  for k,v in combinations_per_players.items() }
+#found = { k:v.found for k,v in combinations_per_players.items() }
+#acceptable = { k:v.acceptable for k,v in combinations_per_players.items() }
 
+if __name__ == '__main__':
+    pass
 
