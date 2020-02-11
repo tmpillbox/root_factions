@@ -1,5 +1,18 @@
+#!/usr/bin/env python3
+
+from __future__ import unicode_literals, print_function
+
 import itertools
-import prompt_toolkit
+from prompt_toolkit import prompt
+import argparse
+import shlex
+
+from prompt_toolkit import print_formatted_text as print
+
+from prompt_toolkit import PromptSession
+from prompt_toolkit.completion import WordCompleter
+from prompt_toolkit.styles import Style
+
 
 faction_stats = {
     'Marquise de Cat': {
@@ -217,6 +230,75 @@ _ = [ Faction(k, v['key'], v['short'], v['max'], v['reach'])  for k,v in faction
 #found = { k:v.found for k,v in combinations_per_players.items() }
 #acceptable = { k:v.acceptable for k,v in combinations_per_players.items() }
 
-if __name__ == '__main__':
-    pass
+rf_completer = WordCompleter(
+    [
+        "players",
+        "require",
+        "recommended",
+        "expert",
+        "target_reach"
+    ],
+    ignore_case=True
+)
 
+style = Style.from_dict(
+    {
+        "completion-menu.completion": "bg:#008888 #ffffff",
+        "completion-menu.completion.current": "bg:#00aaaa #000000",
+        "scrollbar.background": "bg:#88aaaa",
+        "scrollbar.button": "bg:#222222",
+    }
+)
+
+
+class InteractivePrompt:
+    def __init__(self, args):
+        self._args = args
+        self.session = PromptSession(completer=rf_completer, style=style)
+        self._loop_status = True
+
+    def _eval(self, input_text):
+        args = shlex.split(input_text.strip())
+        cmd = args[0]
+
+        if (cmd == "exit" or cmd == "quit"):
+            self._loop_status = False
+        if (cmd == "args"):
+            print("{}\n".format(repr(self._args)))
+        if (cmd == "players" and len(args) == 1):
+            print("players: {}\n".format(self._args['players']))
+        if (cmd == "players" and len(args) == 2):
+            try:
+                players = int(args[1])
+                if players >= 2 and players <= 6:
+                    self._args['players'] = players
+            except:
+                pass
+        if (cmd == "required"):
+            if (len(args) == 1):
+                pass
+
+
+
+    def repl(self):
+        while self._loop_status:
+            try:
+                text = self.session.prompt("> ")
+            except KeyboardInterrupt:
+                continue # Control-C pressed, Try again.
+            except EOFError:
+                break # Control-D pressed.
+            if (len(text) > 0):
+                self._eval(text)
+        print("Goodbye!")
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description='Calculate valid or recommended Root faction combinations')
+    parser.add_argument('--require', action="append")
+    parser.add_argument('--recommended', choices=["recommended", "expert", "valid", "any"], default="recommended")
+    parser.add_argument('--expert', nargs='?', default="17")
+    parser.add_argument('--players', type=int, default=0)
+    parser.add_argument('--interactive', action="store_true")
+    args = vars(parser.parse_args())
+    if args['interactive']:
+        InteractivePrompt(args).repl()
